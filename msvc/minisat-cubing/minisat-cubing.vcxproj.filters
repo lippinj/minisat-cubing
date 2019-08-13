@@ -1,0 +1,195 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files\minisat">
+      <UniqueIdentifier>{6db11e8b-4a2a-4946-a9c2-5dfe26cb3c4d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\zlib">
+      <UniqueIdentifier>{a11fb2fc-3d5b-4d99-8a62-041a1b1c2067}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\cs">
+      <UniqueIdentifier>{8f70df41-eeb0-494d-a5d4-5065c35cbfa9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\cs">
+      <UniqueIdentifier>{377d3f6c-4f54-4465-b510-41e3706c1815}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\minisat">
+      <UniqueIdentifier>{c1801b4b-9b93-464c-95ea-b80a80d7e975}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\minisat\core">
+      <UniqueIdentifier>{59d8de9a-2b2a-4d6f-8cdd-f8ea62aed567}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\minisat\mtl">
+      <UniqueIdentifier>{7d3fe8a2-1807-4d72-983e-2eb0268537d9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\minisat\utils">
+      <UniqueIdentifier>{ced66208-d133-484f-a6b4-001e26f0fd47}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\minisat\simp">
+      <UniqueIdentifier>{99b7011d-3285-4159-bbbf-d11666bd5702}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\minisat\core\Solver.cc">
+      <Filter>Source Files\minisat</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\minisat\simp\SimpSolver.cc">
+      <Filter>Source Files\minisat</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\minisat\utils\Options.cc">
+      <Filter>Source Files\minisat</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\minisat\utils\System.cc">
+      <Filter>Source Files\minisat</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\zlib\adler32.c">
+      <Filter>Source Files\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\zlib\compress.c">
+      <Filter>Source Files\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\zlib\crc32.c">
+      <Filter>Source Files\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\zlib\deflate.c">
+      <Filter>Source Files\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\zlib\gzclose.c">
+      <Filter>Source Files\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\zlib\gzlib.c">
+      <Filter>Source Files\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\zlib\gzread.c">
+      <Filter>Source Files\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\zlib\gzwrite.c">
+      <Filter>Source Files\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\zlib\infback.c">
+      <Filter>Source Files\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\zlib\inffast.c">
+      <Filter>Source Files\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\zlib\inflate.c">
+      <Filter>Source Files\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\zlib\inftrees.c">
+      <Filter>Source Files\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\zlib\trees.c">
+      <Filter>Source Files\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\zlib\uncompr.c">
+      <Filter>Source Files\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\zlib\zutil.c">
+      <Filter>Source Files\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\cs\CubeQueue.cc">
+      <Filter>Source Files\cs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\cs\CubifyingSolver.cc">
+      <Filter>Source Files\cs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\cs\CubifyingSolverBase.cc">
+      <Filter>Source Files\cs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\cs\InterleavedSolver.cc">
+      <Filter>Source Files\cs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Main.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Main_minisat_cs1.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\cs\Cube.h">
+      <Filter>Header Files\cs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cs\CubeIndex.h">
+      <Filter>Header Files\cs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cs\CubeQueue.h">
+      <Filter>Header Files\cs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cs\CubifyingSolver.h">
+      <Filter>Header Files\cs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cs\CubifyingSolverBase.h">
+      <Filter>Header Files\cs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cs\InterleavedSolver.h">
+      <Filter>Header Files\cs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\minisat\core\Dimacs.h">
+      <Filter>Header Files\minisat\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\minisat\core\Solver.h">
+      <Filter>Header Files\minisat\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\minisat\core\SolverTypes.h">
+      <Filter>Header Files\minisat\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\minisat\minisat\mtl\Alg.h">
+      <Filter>Header Files\minisat\mtl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\minisat\minisat\mtl\Alloc.h">
+      <Filter>Header Files\minisat\mtl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\minisat\minisat\mtl\Heap.h">
+      <Filter>Header Files\minisat\mtl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\minisat\minisat\mtl\IntMap.h">
+      <Filter>Header Files\minisat\mtl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\minisat\minisat\mtl\IntTypes.h">
+      <Filter>Header Files\minisat\mtl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\minisat\minisat\mtl\Map.h">
+      <Filter>Header Files\minisat\mtl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\minisat\minisat\mtl\Queue.h">
+      <Filter>Header Files\minisat\mtl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\minisat\minisat\mtl\Rnd.h">
+      <Filter>Header Files\minisat\mtl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\minisat\minisat\mtl\Sort.h">
+      <Filter>Header Files\minisat\mtl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\minisat\minisat\mtl\Vec.h">
+      <Filter>Header Files\minisat\mtl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\minisat\minisat\mtl\XAlloc.h">
+      <Filter>Header Files\minisat\mtl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\minisat\minisat\utils\Options.h">
+      <Filter>Header Files\minisat\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\minisat\minisat\utils\ParseUtils.h">
+      <Filter>Header Files\minisat\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\minisat\minisat\utils\System.h">
+      <Filter>Header Files\minisat\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\minisat\minisat\simp\SimpSolver.h">
+      <Filter>Header Files\minisat\simp</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

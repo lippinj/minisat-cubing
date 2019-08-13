@@ -90,8 +90,8 @@ double Minisat::memUsed() {
 double Minisat::memUsedPeak() { return memUsed(); }
 
 #else
-double Minisat::memUsed()     { return 0; }
-double Minisat::memUsedPeak() { return 0; }
+double Minisat::memUsed()         { return 0; }
+double Minisat::memUsedPeak(bool) { return 0; }
 #endif
 
 
