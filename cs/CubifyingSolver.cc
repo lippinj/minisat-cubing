@@ -49,12 +49,22 @@ lbool CubifyingSolver::refuteCube(const Cube& base, const Cube& reduced)
 	if (cq.contains(base)) cq.pop(base);
 
 	if (!ci.contains(reduced)) {
+		cubifyQueue.push_back(clauses.size());
 		learnNegationOf(reduced);
 		ci.push(reduced);
-		pushCubify(reduced);
 	}
 
 	return ok ? l_Undef : l_False;
+}
+
+bool CubifyingSolver::pruneClause(const int i, const Cube& C)
+{
+	dropClause(i);
+	if (!ci.contains(C)) {
+		Minisat::vec<Lit> v;
+		C.invert(v);
+		return addClause_(v);
+	}
 }
 
 void CubifyingSolver::bootstrap()
@@ -63,80 +73,75 @@ void CubifyingSolver::bootstrap()
 	assert(decisionLevel() == 0);
 #endif
 
-	for (int i = 0; i < clauses.size(); ++i)
-	{
-		// Resolve which clause to inspect.
-		const CRef cr = clauses[i];
-		const Clause& clause = ca[cr];
-
-		// Find the subclause under known assignments. For practical reasons,
-		// it is represented as its negation (which is a cube).
-		Cube root;
-		bool sat = rootOf(clause, root);
-
-		// Already-satisfied clauses need not be addressed.
-		if (sat) continue;
-
-#ifndef NO_CS_ASSERTS
-		// Sanity check.
-		assert(root.size() > 1);
-		assert(isConflicted(root));
-#endif
-
-		// Enqueue the clause for a call to cubify().
-		pushCubify(root);
-	}
-}
-
-void CubifyingSolver::pushCubify(const Cube& cube)
-{
-#ifndef NO_CS_ASSERTS
-	assert(cube.sane());
-#endif
-
-	if (cube.size() <= maxCubifiableSize) {
-		if (cubifyQueue.count(cube) > 0) return;
-		if (cubifyQueueDone.contains(cube)) return;
-		cubifyQueue.insert(cube);
+	cubifyQueue.reserve(clauses.size());
+	for (int i = 0; i < clauses.size(); ++i) {
+		cubifyQueue.push_back(bi.bw(i));
 	}
 }
 
 bool CubifyingSolver::canCubify() const
 {
-	return cubifyQueue.size() > 0;
+	for (const auto j : cubifyQueue) {
+		if (bi.fw(j) >= 0) {
+			return true;
+		}
+	}
+	return false;
 }
 
 lbool CubifyingSolver::cubifyOne()
 {
-	auto it = cubifyQueue.begin();
-	cubifyQueueDone.push(*it);
-	auto ret = cubify(*it);
-	cubifyQueue.erase(it);
-	return ret;
+	while (!cubifyQueue.empty()) {
+		int j = cubifyQueue.back();
+		cubifyQueue.pop_back();
+
+		int i = bi.fw(j);
+		if (i >= 0) {
+			return cubify(i);
+		}
+	}
+	return l_Undef;
 }
 
-lbool CubifyingSolver::cubify(const Cube& cube)
+lbool CubifyingSolver::cubify(const int i)
 {
 #ifndef NO_CS_ASSERTS
+	assert(ok);
 	assert(decisionLevel() == 0);
 #endif
 
-	// Reduce the cube.
+	CRef cr = clauses[i];
+	const Clause& clause = ca[cr];
+
+	// Reduce the clause to a minimal conflicting cube (minimal in a weak sense).
 	Cube root;
-	for (auto it = cube.begin(); it != cube.end(); ++it) {
-		auto v = value(*it);
-		if (v == l_Undef) {
-			root.push(*it);
+	for (int k = 0; k < clause.size(); ++k) {
+		auto L = clause[k];
+		auto v = value(L);
+
+		if (v == l_True) {
+			// If the literal is true, the clause is satisfied.
+			return l_Undef;
 		}
 		else if (v == l_False) {
-			root.clear();
-			break;
+			// If the literal is false, it need not be included.
+		}
+		else {
+			// If the literal value is undefined, it is included.
+			root.push(~L);
 		}
 	}
 
-	// If the clause is satisfied or unit, ignore it.
-	if (root.size() == 0) return ok ? l_Undef : l_False;
-	if (root.size() == 1) return refuteCube(root, root);
+	// If the minimal conflict cube is too big, don't cubify it (but prune it, if
+	// possible).
+	if (root.size() > maxCubifiableSize) {
+		if (root.size() < clause.size()) {
+			return pruneClause(i, root) ? l_Undef : l_False;
+		}
+		return l_Undef;
+	}
+
+	// if (root.size() == 1) return refuteCube(root, root);
 
 #ifndef NO_CS_ASSERTS
 	// Sanity check.
@@ -148,10 +153,7 @@ lbool CubifyingSolver::cubify(const Cube& cube)
 	// Cubify the clause, unless it's unit under UP.
 	//
 	// If a subsumption is found, immediately replace the clause with
-	// the reduced clause and recursively cubify the child.
-    //
-    // Don't cubify if the clause is very large (but if it emerges
-    // that the clause can be pruned here, do it).
+	// the reduced clause and enqueue the child for cubification.
 	Cube post = cubifyInternal(root);
 
 #ifndef NO_CS_ASSERTS
@@ -161,8 +163,10 @@ lbool CubifyingSolver::cubify(const Cube& cube)
 	assert(isConflicted(post));
 #endif
 
-	if (post.size() < root.size())
+	if (post.size() < clause.size())
 	{
+		dropClause(i);
+
 		if (post.size() == 1)
 		{
 			const auto L = post[0];
@@ -174,17 +178,15 @@ lbool CubifyingSolver::cubify(const Cube& cube)
 		}
 		else {
 			if (!ci.contains(post)) {
-				pushCubify(post);
+				cubifyQueue.push_back(clauses.size());
 
 				vec<Lit> v;
 				post.invert(v);
+				addClause_(v);
 
-				CRef cr = ca.alloc(v, false);
-				attachClause(cr);
+				ci.push(post);
 			}
 		}
-
-		ci.push(post);
 	}
 
 	return ok ? l_Undef : l_False;

@@ -203,6 +203,29 @@ bool CubifyingSolverBase::learnNegationOf(const Cube& cube)
 	return addClause_(v);
 }
 
+void CubifyingSolverBase::dropClause(const int i)
+{
+#ifndef NO_CS_ASSERTS
+	assert(i < clauses.size());
+#endif
+
+	const int j = clauses.size() - 1;
+	if (i == j) {
+		bi.drop(j);
+		removeClause(clauses[j]);
+		clauses.shrink(1);
+	}
+	else {
+		const CRef cri = clauses[i];
+		const CRef crj = clauses[j];
+		clauses[i] = crj;
+		clauses.shrink(1);
+		bi.swap(i, j);
+		bi.drop(j);
+		removeClause(cri);
+	}
+}
+
 void CubifyingSolverBase::printStepStats() const
 {
 	double totalTime

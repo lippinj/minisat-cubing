@@ -128,7 +128,7 @@
     <ClCompile Include="..\..\cs\CubifyingSolverBase.cc" />
     <ClCompile Include="..\..\cs\InterleavedSolver.cc" />
     <ClCompile Include="..\..\Main.cc" />
-    <ClCompile Include="..\..\Main_minisat_cs1.cc" />
+    <ClCompile Include="..\..\Main_cubing.cc" />
     <ClCompile Include="..\..\minisat\core\Solver.cc" />
     <ClCompile Include="..\..\minisat\simp\SimpSolver.cc" />
     <ClCompile Include="..\..\minisat\utils\Options.cc" />
@@ -165,6 +165,7 @@
     <ClInclude Include="..\..\..\minisat\minisat\utils\Options.h" />
     <ClInclude Include="..\..\..\minisat\minisat\utils\ParseUtils.h" />
     <ClInclude Include="..\..\..\minisat\minisat\utils\System.h" />
+    <ClInclude Include="..\..\cs\Bimap.h" />
     <ClInclude Include="..\..\cs\Cube.h" />
     <ClInclude Include="..\..\cs\CubeIndex.h" />
     <ClInclude Include="..\..\cs\CubeQueue.h" />

@@ -47,12 +47,12 @@ protected:
     // Enqueue all problem clauses (as long as they are not too big).
 	void bootstrap() override;
 
-    // Enqueue a clause for cubification, unless it's too big.
-	void pushCubify(const Cube&);
-
 protected:
-	lbool cubify(const Cube&);
+	lbool cubify(const int i);
 	Cube cubifyInternal(const Cube&);
+
+	// Replace i:th clause with the negation of C.
+	bool pruneClause(const int i, const Cube& C);
 
 protected:
     // Queue of cubes to search on, ordered by the density score. This object
@@ -64,10 +64,8 @@ protected:
     // than the clauses as such, are stored.
     CubeIndex ci;
 
-    // Clauses enqueued for cubification and already cubified, both stored as
-    // their negations.
-	std::unordered_set<Cube> cubifyQueue;
-	CubeIndex cubifyQueueDone;
+	// Permanent indices of clauses to cubify.
+	std::vector<int> cubifyQueue;
 };
 
 } // namespace Minisat

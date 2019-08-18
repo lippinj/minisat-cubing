@@ -114,7 +114,7 @@
     <ClCompile Include="..\..\Main.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Main_minisat_cs1.cc">
+    <ClCompile Include="..\..\Main_cubing.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -190,6 +190,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\minisat\minisat\simp\SimpSolver.h">
       <Filter>Header Files\minisat\simp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cs\Bimap.h">
+      <Filter>Header Files\cs</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

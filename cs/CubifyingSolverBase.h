@@ -86,6 +86,8 @@ protected:
 	bool rootOf(const Clause&, Cube&);
 	bool isConflicted(const Cube&);
 
+	void dropClause(const int i);
+
 protected:
 	int exitPoint = 0;
 	double stepTime0;

@@ -175,6 +175,7 @@ bool Solver::addClause_(vec<Lit>& ps)
         CRef cr = ca.alloc(ps, false);
         clauses.push(cr);
         attachClause(cr);
+		bi.add(clauses.size() - 1);
     }
 
     return true;
@@ -599,7 +600,7 @@ void Solver::reduceDB()
 }
 
 
-void Solver::removeSatisfied(vec<CRef>& cs)
+void Solver::removeSatisfied(vec<CRef>& cs, bool is_primary)
 {
     int i, j;
     for (i = j = 0; i < cs.size(); i++){
@@ -614,10 +615,12 @@ void Solver::removeSatisfied(vec<CRef>& cs)
                     c[k--] = c[c.size()-1];
                     c.pop();
                 }
+			if (is_primary) bi.will_move(i, j);
             cs[j++] = cs[i];
         }
     }
     cs.shrink(i - j);
+	if (is_primary) bi.flip_buffer();
 }
 
 
@@ -652,7 +655,7 @@ bool Solver::simplify()
     // Remove satisfied clauses:
     removeSatisfied(learnts);
     if (remove_satisfied){       // Can be turned off.
-        removeSatisfied(clauses);
+        removeSatisfied(clauses, true);
 
         // TODO: what todo in if 'remove_satisfied' is false?
 
@@ -1047,9 +1050,11 @@ void Solver::relocAll(ClauseAllocator& to)
     for (i = j = 0; i < clauses.size(); i++)
         if (!isRemoved(clauses[i])){
             ca.reloc(clauses[i], to);
+			bi.will_move(i, j);
             clauses[j++] = clauses[i];
         }
     clauses.shrink(i - j);
+	bi.flip_buffer();
 }
 
 
