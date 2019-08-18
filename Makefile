@@ -2,7 +2,8 @@ CXX=g++
 
 CXX_STD=-std=c++14
 #CXX_STD=
-CXX_OPT=-O3 -D NO_CS_ASSERTS
+#CXX_OPT=-O3 -D NO_CS_ASSERTS
+CXX_OPT=-O3
 CXX_DBG=-D NDEBUG
 #CXX_OPT=
 #CXX_DBG=-g -O0 -D DEBUG
@@ -30,11 +31,11 @@ OBJECTS=\
 		build/cs/CubifyingSolverBase.o\
 		build/cs/CubifyingSolver.o\
 		build/Main.o\
-		build/Main_minisat_cs1.o
+		build/Main_cubing.o
 
 all: $(OBJECTS)
-	rm -f minisat_cs1
-	$(CXX) $(CXXFLAGS) $(OBJECTS) --static -lz -o minisat_cs1
+	rm -f minisat_cubing
+	$(CXX) $(CXXFLAGS) $(OBJECTS) --static -lz -o minisat_cubing
 
 $(BUILDDIRS):
 	mkdir -p $(BUILDDIRS)
