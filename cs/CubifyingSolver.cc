@@ -100,7 +100,7 @@ lbool CubifyingSolver::cubifyOne()
 			return cubify(i);
 		}
 	}
-	return l_Undef;
+return l_Undef;
 }
 
 lbool CubifyingSolver::cubify(const int i)
@@ -154,11 +154,17 @@ lbool CubifyingSolver::cubify(const int i)
 	//
 	// If a subsumption is found, immediately replace the clause with
 	// the reduced clause and enqueue the child for cubification.
-	Cube post = cubifyInternal(root);
+	Cube post = cubifyInternal(i, root);
+
+	// Special case: an empty postcube indicates that the clause under inspection
+	// is subsumed by another problem clause.
+	if (post.size() == 0) {
+		dropClause(i);
+		return ok ? l_Undef : l_False;
+	}
 
 #ifndef NO_CS_ASSERTS
 	// Sanity checks.
-	assert(post.size() > 0);
 	assert(post.subsetOf(root));
 	assert(isConflicted(post));
 #endif
@@ -192,72 +198,89 @@ lbool CubifyingSolver::cubify(const int i)
 	return ok ? l_Undef : l_False;
 }
 
-Cube CubifyingSolver::cubifyInternal(const Cube& root)
+bool CubifyingSolver::makeCubifyPathTrivial(const Cube& C, std::vector<Lit>& path)
 {
+	Cube cube;
+
+	int N = C.size();
+	for (int i = 0; i < N; ++i)
+	{
+		for (int j = i - 1; j < N; ++j)
+		{
+			if (j < 0) continue;
+			if (j == i) continue;
+
+			auto L = C[j];
+
+			cube.push(L);
+			if (ci.contains(cube)) {
+				return false;
+			}
+
+			path.push_back(L);
+		}
+
+		for (int j = i + 1; j < N; ++j) {
+			cube.pop(C[j]);
+			path.push_back(lit_Undef);
+		}
+	}
+
+	return true;
+}
+
+Cube CubifyingSolver::cubifyInternal(const int i, const Cube& root)
+{
+	std::vector<Lit> path;
+	auto pathOk = makeCubifyPathTrivial(root, path);
+	if (!pathOk) return Cube();
+
 	int cubeSize = root.size() - 1;
 	int level0 = decisionLevel();
 	int trail0 = trail.size();
 
 	Cube cube;
-
-	// In the nominal case, there are cubeSize subcubes for clause: one for
-	// each literal that can be dropped (from ~clause).
-	for (int iSkip = cubeSize; iSkip >= 0; --iSkip)
+	bool conflict = false;
+	std::vector<Lit> stack;
+	for (const auto L : path)
 	{
-		// Loop invariant here:
-		//
-		// 1. For some n, the cube contains exactly the first n literals of
-		//    the subcube skipping i (n may be 0).
-		//
-		// 2. The literals in the cube correspond to current decision levels
-		//    beyond the zeroth one.
-#ifndef NO_CS_ASSERTS
-		assert(cube.size() <= iSkip);
-		assert((decisionLevel() - level0) == cube.size());
-		assert(root.startsWith(cube));
-#endif
-
-		// Has the cube skipping i already been processed somewhere?
-		Cube term;
-		for (int i = 0; i < root.size(); ++i) {
-			if (i != iSkip) {
-				term.push(root[i]);
-			}
+		// Pop top literal
+		if (L == lit_Undef) {
+			cube.pop(stack.back());
+			stack.pop_back();
+			cancelUntil(decisionLevel() - 1);
 		}
 
-		// Only process the cube explicitly if it has not.
-		if (!ci.contains(term) && !cq.contains(term))
-		{
-			bool conflictFound = false;
-			for (int i = 0; i < root.size(); ++i)
-			{
-				if (i < cube.size()) continue;
-				if (i == iSkip) continue;
+		// Push literal L
+		else {
+			stack.push_back(L);
+			newDecisionLevel();
+			auto v = value(L);
 
-				Lit L = root[i];
-				lbool v = value(L);
-
-				newDecisionLevel();
-				if (v != l_True)
-				{
-					cube.push(L);
-
-					if (ci.contains(cube)) {
-						conflictFound = true;
-						break;
-					}
-
-					if (v == l_False) {
-						conflictFound = true;
-						break;
-					}
-					else {
-						enqueue(L);
-						if (propagate() != CRef_Undef) {
-							conflictFound = true;
-							break;
-						}
-					}
+			// Case 1:
+			// L is in UP-conflict with the current state.
+			// Subsuming clause ~(C u L) found; exit.
+			if (v == l_False) {
+				cube.push(L);
+				conflict = true;
+				break;
+			}
+			//  Case 2:
+			// L is UP-required by the current state.
+			// Enqueuing and propagating it would be tautological.
+			else if (v == l_True) {
+				continue;
+			}
+			// Case 3:
+			// Enqueue and propagate L. Record the score for (C u L), unless
+			// propagation shows that (C u L) is a conflict (in which case
+			// we found a subsuming clause ~(C u L).
+			else {
+				cube.push(L);
+				enqueue(L);
+				if (propagate() != CRef_Undef) {
+					conflict = true;
+					break;
 				}
 
 				double num = trail.size() - trail0;
@@ -265,31 +288,16 @@ Cube CubifyingSolver::cubifyInternal(const Cube& root)
 				double score = num / den;
 				cq.push(cube, score);
 			}
-
-			if (conflictFound) {
-				cancelUntil(level0);
-				return cube;
-			}
-		}
-
-		// Unwind down to only those literals that are also shared with the
-		// next subcube.
-		if (iSkip == 0) {
-			cancelUntil(level0);
-		}
-		else {
-			int iSkipNext = iSkip - 1;
-			cancelUntil(level0 + iSkipNext);
-
-			cube.clear();
-			int keepSize = decisionLevel() - level0;
-			for (int i = 0; i < keepSize; ++i) {
-				cube.push(root[i]);
-			}
 		}
 	}
 
-	// If this point is reached, no subcube caused a conflict.
+	// Done going through the path; unwind the stack.
+	cancelUntil(level0);
+
+	// If a subsumption was found, return it.
+	if (conflict) return cube;
+
+	// Otherwise, return the original cube.
 	return root;
 }
 

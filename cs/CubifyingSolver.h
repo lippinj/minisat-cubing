@@ -48,8 +48,27 @@ protected:
 	void bootstrap() override;
 
 protected:
+	// Cubify the clause with transient index i.
 	lbool cubify(const int i);
-	Cube cubifyInternal(const Cube&);
+
+	// Plan a path of propagate/cancel operations that touches every cube
+	// implicant not already accounted for. Returns true by default; returns
+	// false if an explicit subsumption was found.
+	//
+	//   In the path that is returned, a defined literal x means:
+	//      1. propagate x, if not already implied
+	//      2. enqueue implicant up to x
+	//   An undefined literal (lit_Undef) means:
+	//      1. cancel one level
+	bool makeCubifyPathTrivial(const Cube&, std::vector<Minisat::Lit>&);
+
+	// Returns a conflicting subcube of the root cube (in the typical case,
+	// returns the cube by itself; the procedure may discover strengthenings,
+	// however.)
+	//
+	// An exception is if the returned cube is empty, which indicates that the
+	// cube is already subsumed in the problem and can be summarily dropped.
+	Cube cubifyInternal(const int i, const Cube&);
 
 	// Replace i:th clause with the negation of C.
 	bool pruneClause(const int i, const Cube& C);

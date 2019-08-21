@@ -109,7 +109,7 @@ inline void Cube::pop(Lit L)
         {
             while (i < (N - 1))
             {
-                literals[i] = literals[i+1];
+                literals[i] = literals[++i];
             }
             literals.resize(N - 1);
             return;
