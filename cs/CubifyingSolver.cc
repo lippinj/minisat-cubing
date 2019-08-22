@@ -198,31 +198,57 @@ lbool CubifyingSolver::cubify(const int i)
 	return ok ? l_Undef : l_False;
 }
 
-bool CubifyingSolver::makeCubifyPathTrivial(const Cube& C, std::vector<Lit>& path)
+bool CubifyingSolver::makeCubifyPathBasic(const Cube& C, std::vector<Lit>& path)
 {
+	std::vector<Lit> c(C.begin(), C.end());
+	return makeCubifyPath(c, path);
+}
+
+bool CubifyingSolver::makeCubifyPath(const std::vector<Lit>& C, std::vector<Lit>& path)
+{
+	int N = C.size();
 	Cube cube;
 
-	int N = C.size();
+	// Each i corresponds to the subcube C \ C[i], which is of size N - 1.
+	//
+	// At each i, the following invariant holds:
+	//   cube = C[0, ..., i-2]
+	//
+	// Therefore we reach C \ C[i] by pushing:
+	//   C[i-1], C[i+1], C[i+2], ...
+	//
+	// The path and its cancellation are pushed to the stack, except if we
+	// already know a score for C \ C[i], in which case that i is skipped.
 	for (int i = 0; i < N; ++i)
 	{
-		for (int j = i - 1; j < N; ++j)
-		{
-			if (j < 0) continue;
-			if (j == i) continue;
-
-			auto L = C[j];
-
-			cube.push(L);
-			if (ci.contains(cube)) {
-				return false;
+		Cube terminal;
+		for (int j = 0; j < N; ++j) {
+			if (j != i) {
+				terminal.push(C[j]);
 			}
-
-			path.push_back(L);
 		}
 
-		for (int j = i + 1; j < N; ++j) {
-			cube.pop(C[j]);
-			path.push_back(lit_Undef);
+		if (!cq.contains(terminal))
+		{
+			for (int j = i - 1; j < N; ++j)
+			{
+				if (j < 0) continue;
+				if (j == i) continue;
+
+				auto L = C[j];
+
+				cube.push(L);
+				if (ci.contains(cube)) {
+					return false;
+				}
+
+				path.push_back(L);
+			}
+
+			for (int j = i + 1; j < N; ++j) {
+				cube.pop(C[j]);
+				path.push_back(lit_Undef);
+			}
 		}
 	}
 
@@ -232,7 +258,7 @@ bool CubifyingSolver::makeCubifyPathTrivial(const Cube& C, std::vector<Lit>& pat
 Cube CubifyingSolver::cubifyInternal(const int i, const Cube& root)
 {
 	std::vector<Lit> path;
-	auto pathOk = makeCubifyPathTrivial(root, path);
+	auto pathOk = makeCubifyPathBasic(root, path);
 	if (!pathOk) return Cube();
 
 	int cubeSize = root.size() - 1;
@@ -272,8 +298,9 @@ Cube CubifyingSolver::cubifyInternal(const int i, const Cube& root)
 				continue;
 			}
 			// Case 3:
-			// Enqueue and propagate L. Record the score for (C u L), unless
-			// propagation shows that (C u L) is a conflict (in which case
+			// Enqueue and propagate L. Record the score for (C u L).
+			// 
+			// Exception: if propagation shows that (C u L) is a conflict,
 			// we found a subsuming clause ~(C u L).
 			else {
 				cube.push(L);
