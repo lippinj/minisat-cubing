@@ -158,7 +158,14 @@ bool CubifyingSolverBase::isConflicted(const Cube& cube)
 
 	newDecisionLevel();
 	for (auto it = cube.begin(); it != cube.end(); ++it) {
-		enqueue(*it);
+		auto L = *it;
+		if (value(L) == l_False) {
+			cancelUntil(0);
+			return true;
+		}
+		else {
+			enqueue(L);
+		}
 	}
 	if (propagate() != CRef_Undef) {
 		cancelUntil(0);

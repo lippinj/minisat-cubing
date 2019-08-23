@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include "minisat/utils/Options.h"
 #include "minisat/utils/System.h"
 #include "CubifyingSolver.h"
@@ -77,6 +79,8 @@ void CubifyingSolver::bootstrap()
 	for (int i = 0; i < clauses.size(); ++i) {
 		cubifyQueue.push_back(bi.bw(i));
 	}
+
+	literalDifficulty.resize(2 * nVars(), INT_MAX);
 }
 
 bool CubifyingSolver::canCubify() const
@@ -204,6 +208,15 @@ bool CubifyingSolver::makeCubifyPathBasic(const Cube& C, std::vector<Lit>& path)
 	return makeCubifyPath(c, path);
 }
 
+bool CubifyingSolver::makeCubifyPathDifficultyOrder(const Cube& C, std::vector<Lit>& path)
+{
+	std::vector<Lit> c(C.begin(), C.end());
+	std::sort(c.begin(), c.end(), [&](const Lit& lhs, const Lit& rhs) {
+			return literalDifficulty[lhs.x] > literalDifficulty[rhs.x]; });
+
+	return makeCubifyPath(c, path);
+}
+
 bool CubifyingSolver::makeCubifyPath(const std::vector<Lit>& C, std::vector<Lit>& path)
 {
 	int N = C.size();
@@ -258,10 +271,9 @@ bool CubifyingSolver::makeCubifyPath(const std::vector<Lit>& C, std::vector<Lit>
 Cube CubifyingSolver::cubifyInternal(const int i, const Cube& root)
 {
 	std::vector<Lit> path;
-	auto pathOk = makeCubifyPathBasic(root, path);
+	auto pathOk = makeCubifyPathDifficultyOrder(root, path);
 	if (!pathOk) return Cube();
 
-	int cubeSize = root.size() - 1;
 	int level0 = decisionLevel();
 	int trail0 = trail.size();
 
@@ -303,11 +315,17 @@ Cube CubifyingSolver::cubifyInternal(const int i, const Cube& root)
 			// Exception: if propagation shows that (C u L) is a conflict,
 			// we found a subsuming clause ~(C u L).
 			else {
+				auto propagationsBefore = propagations;
+
 				cube.push(L);
 				enqueue(L);
 				if (propagate() != CRef_Undef) {
 					conflict = true;
 					break;
+				}
+
+				if (cube.size() == 1) {
+					literalDifficulty[L.x] = propagations - propagationsBefore;
 				}
 
 				double num = trail.size() - trail0;
