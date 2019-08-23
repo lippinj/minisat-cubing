@@ -210,8 +210,32 @@ bool CubifyingSolver::makeCubifyPathBasic(const Cube& C, std::vector<Lit>& path)
 
 bool CubifyingSolver::makeCubifyPathDifficultyOrder(const Cube& C, std::vector<Lit>& path)
 {
-	std::vector<Lit> c(C.begin(), C.end());
-	std::sort(c.begin(), c.end(), [&](const Lit& lhs, const Lit& rhs) {
+	// First of all, place in front every literals L such that we already have
+	// a score for C \ L.
+	std::vector<Lit> c(C.size());
+	int iNextSkippable = 0;
+	int iNextNormal = C.size() - 1;
+
+	for (const auto L : C) {
+		Cube term;
+		for (const auto K : C) {
+			if (K != L) {
+				term.push(K);
+			}
+		}
+
+		if (cq.contains(term)) {
+			c[iNextSkippable++] = L;
+		}
+		else {
+			c[iNextNormal--] = L;
+		}
+	}
+
+	// Second, order the rest of the literals from predicted-hardest to
+	// predicted-easiest.
+	auto it = c.begin() + iNextSkippable;
+	std::sort(it, c.end(), [&](const Lit& lhs, const Lit& rhs) {
 			return literalDifficulty[lhs.x] > literalDifficulty[rhs.x]; });
 
 	return makeCubifyPath(c, path);
