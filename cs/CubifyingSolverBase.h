@@ -86,6 +86,7 @@ protected:
 	bool rootOf(const Clause&, Cube&);
 	bool isConflicted(const Cube&);
 
+	// Remove the clause with transient index i.
 	void dropClause(const int i);
 
 protected:

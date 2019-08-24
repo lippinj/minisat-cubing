@@ -33,10 +33,10 @@ public:
 	// Enact a buffer flip.
 	void flip_buffer();
 
-	// Return the permanent index associated with the trasient index j.
+	// Return the transient index associated with the permanent index j.
 	int fw(int j) const;
 
-	// Return the transient index associated with the permanent index i.
+	// Return the permanent index associated with the transient index i.
 	int bw(int i) const;
 
 private:

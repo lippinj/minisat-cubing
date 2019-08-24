@@ -5,7 +5,7 @@ CubeQueue::CubeQueue(size_t budget) : budget(budget)
 {
 }
 
-void CubeQueue::push(const Cube& cube, double score)
+void CubeQueue::push(const Cube& cube, double score, int i)
 {
 	if (contains(cube)) return;
 
@@ -14,7 +14,7 @@ void CubeQueue::push(const Cube& cube, double score)
         pop(back);
     }
 
-	implicants[cube] = score;
+	implicants[cube] = { score, i };
 	scorewise[score].push_back(cube);
 
 	sumScore += score;
@@ -27,7 +27,7 @@ void CubeQueue::pop(const Cube& cube)
 	assert(contains(cube));
 #endif
 
-	double score = implicants[cube];
+	double score = implicants[cube].first;
 	auto& vec = scorewise[score];
 	if (vec.size() == 1) {
 		scorewise.erase(score);
@@ -57,6 +57,11 @@ const Cube CubeQueue::peekWorst() const
 bool CubeQueue::contains(const Cube& cube) const
 {
 	return implicants.find(cube) != implicants.end();
+}
+
+int CubeQueue::indexOf(const Cube& cube) const
+{
+	return implicants.at(cube).second;
 }
 
 bool CubeQueue::empty() const

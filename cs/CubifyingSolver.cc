@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include "minisat/utils/Options.h"
 #include "minisat/utils/System.h"
 #include "CubifyingSolver.h"
@@ -46,12 +48,22 @@ bool CubifyingSolver::pickCube(Cube& cube)
 
 lbool CubifyingSolver::refuteCube(const Cube& base, const Cube& reduced)
 {
-	if (cq.contains(base)) cq.pop(base);
+#ifndef NO_CS_ASSERTS
+	assert(cq.contains(base));
+#endif
 
-	if (!ci.contains(reduced)) {
-		cubifyQueue.push_back(clauses.size());
-		learnNegationOf(reduced);
-		ci.push(reduced);
+	auto i = cq.indexOf(base);
+	auto j = bi.fw(i);
+	cq.pop(base);
+
+	if (j >= 0) {
+		dropClause(j);
+
+		if (!ci.contains(reduced)) {
+			cubifyQueue.push_back(clauses.size());
+			learnNegationOf(reduced);
+			ci.push(reduced);
+		}
 	}
 
 	return ok ? l_Undef : l_False;
@@ -77,6 +89,8 @@ void CubifyingSolver::bootstrap()
 	for (int i = 0; i < clauses.size(); ++i) {
 		cubifyQueue.push_back(bi.bw(i));
 	}
+
+	literalDifficulty.resize(2 * nVars(), INT_MAX);
 }
 
 bool CubifyingSolver::canCubify() const
@@ -198,31 +212,90 @@ lbool CubifyingSolver::cubify(const int i)
 	return ok ? l_Undef : l_False;
 }
 
-bool CubifyingSolver::makeCubifyPathTrivial(const Cube& C, std::vector<Lit>& path)
+bool CubifyingSolver::makeCubifyPathBasic(const Cube& C, std::vector<Lit>& path)
 {
-	Cube cube;
+	std::vector<Lit> c(C.begin(), C.end());
+	return makeCubifyPath(c, path);
+}
 
-	int N = C.size();
-	for (int i = 0; i < N; ++i)
-	{
-		for (int j = i - 1; j < N; ++j)
-		{
-			if (j < 0) continue;
-			if (j == i) continue;
+bool CubifyingSolver::makeCubifyPathDifficultyOrder(const Cube& C, std::vector<Lit>& path)
+{
+	// First of all, place in front every literals L such that we already have
+	// a score for C \ L.
+	std::vector<Lit> c(C.size());
+	int iNextSkippable = 0;
+	int iNextNormal = C.size() - 1;
 
-			auto L = C[j];
-
-			cube.push(L);
-			if (ci.contains(cube)) {
-				return false;
+	for (const auto L : C) {
+		Cube term;
+		for (const auto K : C) {
+			if (K != L) {
+				term.push(K);
 			}
-
-			path.push_back(L);
 		}
 
-		for (int j = i + 1; j < N; ++j) {
-			cube.pop(C[j]);
-			path.push_back(lit_Undef);
+		if (cq.contains(term)) {
+			c[iNextSkippable++] = L;
+		}
+		else {
+			c[iNextNormal--] = L;
+		}
+	}
+
+	// Second, order the rest of the literals from predicted-hardest to
+	// predicted-easiest.
+	auto it = c.begin() + iNextSkippable;
+	std::sort(it, c.end(), [&](const Lit& lhs, const Lit& rhs) {
+			return literalDifficulty[lhs.x] > literalDifficulty[rhs.x]; });
+
+	return makeCubifyPath(c, path);
+}
+
+bool CubifyingSolver::makeCubifyPath(const std::vector<Lit>& C, std::vector<Lit>& path)
+{
+	int N = C.size();
+	Cube cube;
+
+	// Each i corresponds to the subcube C \ C[i], which is of size N - 1.
+	//
+	// At each i, the following invariant holds:
+	//   cube = C[0, ..., i-2]
+	//
+	// Therefore we reach C \ C[i] by pushing:
+	//   C[i-1], C[i+1], C[i+2], ...
+	//
+	// The path and its cancellation are pushed to the stack, except if we
+	// already know a score for C \ C[i], in which case that i is skipped.
+	for (int i = 0; i < N; ++i)
+	{
+		Cube terminal;
+		for (int j = 0; j < N; ++j) {
+			if (j != i) {
+				terminal.push(C[j]);
+			}
+		}
+
+		if (!cq.contains(terminal))
+		{
+			for (int j = i - 1; j < N; ++j)
+			{
+				if (j < 0) continue;
+				if (j == i) continue;
+
+				auto L = C[j];
+
+				cube.push(L);
+				if (ci.contains(cube)) {
+					return false;
+				}
+
+				path.push_back(L);
+			}
+
+			for (int j = i + 1; j < N; ++j) {
+				cube.pop(C[j]);
+				path.push_back(lit_Undef);
+			}
 		}
 	}
 
@@ -232,10 +305,9 @@ bool CubifyingSolver::makeCubifyPathTrivial(const Cube& C, std::vector<Lit>& pat
 Cube CubifyingSolver::cubifyInternal(const int i, const Cube& root)
 {
 	std::vector<Lit> path;
-	auto pathOk = makeCubifyPathTrivial(root, path);
+	auto pathOk = makeCubifyPathDifficultyOrder(root, path);
 	if (!pathOk) return Cube();
 
-	int cubeSize = root.size() - 1;
 	int level0 = decisionLevel();
 	int trail0 = trail.size();
 
@@ -272,10 +344,13 @@ Cube CubifyingSolver::cubifyInternal(const int i, const Cube& root)
 				continue;
 			}
 			// Case 3:
-			// Enqueue and propagate L. Record the score for (C u L), unless
-			// propagation shows that (C u L) is a conflict (in which case
+			// Enqueue and propagate L. Record the score for (C u L).
+			// 
+			// Exception: if propagation shows that (C u L) is a conflict,
 			// we found a subsuming clause ~(C u L).
 			else {
+				auto propagationsBefore = propagations;
+
 				cube.push(L);
 				enqueue(L);
 				if (propagate() != CRef_Undef) {
@@ -283,10 +358,14 @@ Cube CubifyingSolver::cubifyInternal(const int i, const Cube& root)
 					break;
 				}
 
+				if (cube.size() == 1) {
+					literalDifficulty[L.x] = propagations - propagationsBefore;
+				}
+
 				double num = trail.size() - trail0;
 				double den = cube.size();
 				double score = num / den;
-				cq.push(cube, score);
+				cq.push(cube, score, i);
 			}
 		}
 	}

@@ -60,7 +60,9 @@ protected:
 	//      2. enqueue implicant up to x
 	//   An undefined literal (lit_Undef) means:
 	//      1. cancel one level
-	bool makeCubifyPathTrivial(const Cube&, std::vector<Minisat::Lit>&);
+	bool makeCubifyPathBasic(const Cube&, std::vector<Lit>&);
+	bool makeCubifyPathDifficultyOrder(const Cube&, std::vector<Lit>&);
+	bool makeCubifyPath(const std::vector<Lit>&, std::vector<Lit>&);
 
 	// Returns a conflicting subcube of the root cube (in the typical case,
 	// returns the cube by itself; the procedure may discover strengthenings,
@@ -85,6 +87,10 @@ protected:
 
 	// Permanent indices of clauses to cubify.
 	std::vector<int> cubifyQueue;
+
+	// Number of total propagations required when most recently propagated this
+	// literal as the first decision.
+	std::vector<int> literalDifficulty;
 };
 
 } // namespace Minisat
