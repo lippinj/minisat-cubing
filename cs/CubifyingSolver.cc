@@ -365,7 +365,7 @@ Cube CubifyingSolver::cubifyInternal(const int i, const Cube& root)
 				double num = trail.size() - trail0;
 				double den = cube.size();
 				double score = num / den;
-				cq.push(cube, score, i);
+				cq.push(cube, score, bi.bw(i));
 			}
 		}
 	}
