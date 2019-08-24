@@ -14,7 +14,7 @@ void CubeQueue::push(const Cube& cube, double score, int i)
         pop(back);
     }
 
-	implicants[cube] = { score, i };
+	implicants[cube] = { score, { i } };
 	scorewise[score].push_back(cube);
 
 	sumScore += score;
@@ -59,7 +59,20 @@ bool CubeQueue::contains(const Cube& cube) const
 	return implicants.find(cube) != implicants.end();
 }
 
-int CubeQueue::indexOf(const Cube& cube) const
+void CubeQueue::addParentInd(const Cube& cube, int i)
+{
+	auto& v = implicants.at(cube).second;
+
+#ifndef NO_CS_ASSERTS
+	for (auto j : v) {
+		assert(j != i);
+	}
+#endif
+
+	v.push_back(i);
+}
+
+std::vector<int> CubeQueue::getParentInds(const Cube& cube) const
 {
 	return implicants.at(cube).second;
 }
