@@ -28,7 +28,8 @@ public:
 	bool contains(const Cube&) const;
 
 	// Persistent index of the parent clause.
-	int indexOf(const Cube&) const;
+	void addParentInd(const Cube&, int i);
+	std::vector<int> getParentInds(const Cube&) const;
 
 	// Is the queue empty?
 	bool empty() const;
@@ -51,7 +52,7 @@ protected:
 	std::map<double, std::vector<Cube>> scorewise;
 
 	// Map like: cube -> (cubeScore, persistentParentIndex)
-	std::unordered_map<Cube, std::pair<double, int>> implicants;
+	std::unordered_map<Cube, std::pair<double, std::vector<int>>> implicants;
 };
 
 #endif

@@ -52,18 +52,20 @@ lbool CubifyingSolver::refuteCube(const Cube& base, const Cube& reduced)
 	assert(cq.contains(base));
 #endif
 
-	auto i = cq.indexOf(base);
-	auto j = bi.fw(i);
+	auto ii = cq.getParentInds(base);
 	cq.pop(base);
 
-	if (j >= 0) {
-		dropClause(j);
-
-		if (!ci.contains(reduced)) {
-			cubifyQueue.push_back(clauses.size());
-			learnNegationOf(reduced);
-			ci.push(reduced);
+	for (auto i : ii) {
+		int j = bi.fw(i);
+		if (j >= 0) {
+			dropClause(j);
 		}
+	}
+
+	if (!ci.contains(reduced)) {
+		cubifyQueue.push_back(clauses.size());
+		learnNegationOf(reduced);
+		ci.push(reduced);
 	}
 
 	return ok ? l_Undef : l_False;
@@ -218,7 +220,7 @@ bool CubifyingSolver::makeCubifyPathBasic(const Cube& C, std::vector<Lit>& path)
 	return makeCubifyPath(c, path);
 }
 
-bool CubifyingSolver::makeCubifyPathDifficultyOrder(const Cube& C, std::vector<Lit>& path)
+bool CubifyingSolver::makeCubifyPathDifficultyOrder(const Cube& C, std::vector<Lit>& path, int iClause)
 {
 	// First of all, place in front every literals L such that we already have
 	// a score for C \ L.
@@ -235,6 +237,7 @@ bool CubifyingSolver::makeCubifyPathDifficultyOrder(const Cube& C, std::vector<L
 		}
 
 		if (cq.contains(term)) {
+			cq.addParentInd(term, bi.bw(iClause));
 			c[iNextSkippable++] = L;
 		}
 		else {
@@ -305,7 +308,7 @@ bool CubifyingSolver::makeCubifyPath(const std::vector<Lit>& C, std::vector<Lit>
 Cube CubifyingSolver::cubifyInternal(const int i, const Cube& root)
 {
 	std::vector<Lit> path;
-	auto pathOk = makeCubifyPathDifficultyOrder(root, path);
+	auto pathOk = makeCubifyPathDifficultyOrder(root, path, i);
 	if (!pathOk) return Cube();
 
 	int level0 = decisionLevel();

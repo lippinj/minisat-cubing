@@ -61,7 +61,7 @@ protected:
 	//   An undefined literal (lit_Undef) means:
 	//      1. cancel one level
 	bool makeCubifyPathBasic(const Cube&, std::vector<Lit>&);
-	bool makeCubifyPathDifficultyOrder(const Cube&, std::vector<Lit>&);
+	bool makeCubifyPathDifficultyOrder(const Cube&, std::vector<Lit>&, int iClause);
 	bool makeCubifyPath(const std::vector<Lit>&, std::vector<Lit>&);
 
 	// Returns a conflicting subcube of the root cube (in the typical case,
