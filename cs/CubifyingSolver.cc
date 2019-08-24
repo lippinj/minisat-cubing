@@ -48,12 +48,22 @@ bool CubifyingSolver::pickCube(Cube& cube)
 
 lbool CubifyingSolver::refuteCube(const Cube& base, const Cube& reduced)
 {
-	if (cq.contains(base)) cq.pop(base);
+#ifndef NO_CS_ASSERTS
+	assert(cq.contains(base));
+#endif
 
-	if (!ci.contains(reduced)) {
-		cubifyQueue.push_back(clauses.size());
-		learnNegationOf(reduced);
-		ci.push(reduced);
+	auto i = cq.indexOf(base);
+	auto j = bi.fw(i);
+	cq.pop(base);
+
+	if (j >= 0) {
+		dropClause(j);
+
+		if (!ci.contains(reduced)) {
+			cubifyQueue.push_back(clauses.size());
+			learnNegationOf(reduced);
+			ci.push(reduced);
+		}
 	}
 
 	return ok ? l_Undef : l_False;
@@ -355,7 +365,7 @@ Cube CubifyingSolver::cubifyInternal(const int i, const Cube& root)
 				double num = trail.size() - trail0;
 				double den = cube.size();
 				double score = num / den;
-				cq.push(cube, score);
+				cq.push(cube, score, i);
 			}
 		}
 	}
