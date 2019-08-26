@@ -5,8 +5,8 @@
 
 namespace Minisat
 {
-// This class generalizes the assumptionless solving procedure of SimpSolver.
-// The original procedure is as follows:
+// This class generalizes the solving procedure of SimpSolver (in the
+//no-assumptions case). The original procedure is as follows:
 //
 //   1. Run elimination (unless disabled)
 //   2. Solver loop:
@@ -21,7 +21,7 @@ namespace Minisat
 //
 // The name "interleaved" refers to the use case of doing something in
 // addition to the search() call, rather than instead of it. The result is
-// search() calls and other code "interleaved".
+// that the search() calls are "interleaved" with this other code.
 class InterleavedSolver : public SimpSolver
 {
 public:

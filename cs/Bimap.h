@@ -7,9 +7,15 @@
 
 // Bidirectional int-to-int map.
 //
-// Used to associate each clause index (the index of clauses[i] is i) with a
-// permanent index. (The transient index may change due to e.g. simplification
-// steps.)
+// Used to define a bijective relationship between two kinds of indices that
+// exist for every problem clause:
+//   - the persistent index (unique to a given clause)
+//   - the transient index (current position in the clause vector)
+//
+// A procedure that records the persistent index of a clause will be able to
+// quickly locate it via this map, even if the clause has since moved (which
+// can happen e.g. due to simplification steps, where satisfied clauses are
+// removed).
 class Bimap
 {
 public:
@@ -26,30 +32,30 @@ public:
 	// Swap the transient index i with transient index j.
 	void swap(int i, int j);
 
-	// Indicate that the clause with transient index i will get transient index j
-	// at the next buffer flip.
+	// Indicate that the clause with transient index i will get transient
+	// index j at the next buffer flip.
 	void will_move(int i, int j);
 
 	// Enact a buffer flip.
 	void flip_buffer();
 
-	// Return the transient index associated with the permanent index j.
+	// Return the transient index associated with the persistent index j.
 	int fw(int j) const;
 
-	// Return the permanent index associated with the transient index i.
+	// Return the persistent index associated with the transient index i.
 	int bw(int i) const;
 
 private:
 	int next_free_index = 0;
 
-	// Permanent-to-transient index map. Any clause that does not occur in this
-	// map no longer exists in the set.
+	// Persistent-to-transient index map. Any clause that does not occur in
+	// this map no longer exists in the set.
 	std::unordered_map<int, int> ptt;
 
-	// Transient-to-permanent index map.
+	// Transient-to-persistent index map.
 	std::vector<int> ttp;
 
-	// Transient-to-permanent index map (pending buffer flip).
+	// Transient-to-persistent index map (pending buffer flip).
 	std::vector<int> ttp_next;
 };
 

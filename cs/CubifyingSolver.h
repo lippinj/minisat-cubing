@@ -72,7 +72,7 @@ protected:
 	// cube is already subsumed in the problem and can be summarily dropped.
 	Cube cubifyInternal(const int i, const Cube&);
 
-	// Replace i:th clause with the negation of C.
+	// Replace i:th clause with the negation of C. (i is a transient index.)
 	bool pruneClause(const int i, const Cube& C);
 
 protected:
@@ -88,8 +88,8 @@ protected:
 	// Permanent indices of clauses to cubify.
 	std::vector<int> cubifyQueue;
 
-	// Number of total propagations required when most recently propagated this
-	// literal as the first decision.
+	// How many propagations were required last time when the indexing literal
+	// was the first decision literal?
 	std::vector<int> literalDifficulty;
 };
 

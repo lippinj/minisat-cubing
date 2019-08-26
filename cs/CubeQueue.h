@@ -7,6 +7,16 @@
 
 #include "Cube.h"
 
+// A queue of cubes under which we can search.
+//
+// Essentially, this is a mapping of:
+//    cube -> score, [clause_ids...]
+// such that the cube with the highest score is quickly accessible.
+//
+// The clause_ids are persistent indices (see Bimap.h) for clauses that are
+// known to be subsumed by the negation of the cube. In other words, if the
+// cube gets refuted, any clauses in clause_ids that still exist can be
+// dropped and replaced with one count of the negation of the cube.
 class CubeQueue
 {
 public:
