@@ -7,16 +7,18 @@
 
 #include "Cube.h"
 
+// Intended as a compact and fast set implementation for cubes.
 class CubeIndex
 {
 public:
     CubeIndex();
 
+	// Add/remove a cube to the set. Callers from outside should ignore the
+	// depth argument.
 	void push(const Cube&, size_t depth=0);
 	void pop(const Cube&, size_t depth=0);
 
 	bool contains(const Cube&, size_t depth=0) const;
-	// bool containsOrSubsumes(const Cube&, size_t depth=0) const;
 
 protected:
 	// Child marks (if the mark is true, that cube exists).

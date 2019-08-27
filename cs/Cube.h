@@ -5,7 +5,9 @@
 #include "minisat/core/SolverTypes.h"
 using Minisat::Lit;
 
-struct Cube {
+// A conjunction of literals.
+struct Cube
+{
 	Cube();
 	Cube(std::initializer_list<Lit>);
     ~Cube();
@@ -20,7 +22,6 @@ struct Cube {
     bool operator!=(const Cube& other) const;
 	bool operator<(const Cube& other) const;
 	Cube operator+(const Cube& other) const;
-    void invert(Minisat::vec<Lit>&) const;
 
     Lit operator[](size_t) const;
     const Lit* begin() const;
@@ -33,9 +34,14 @@ struct Cube {
     size_t hash() const;
 
 public:
-	static Cube inverted(const Minisat::Clause& clause);
+	// Populates v with the negation of this cube.
+    void invert(Minisat::vec<Lit>& v) const;
+
+	// Returns the cube that is the negation of C.
+	static Cube inverted(const Minisat::Clause& C);
 
 private:
+	// Literals in this clause. This is kept in sorted order.
 	std::vector<Lit> literals;
 };
 

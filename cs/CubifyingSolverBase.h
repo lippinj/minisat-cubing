@@ -24,14 +24,22 @@ namespace Minisat
 //
 // The loop body is the following, marking the iteration budget as X:
 //   1. Run a standard search for X conflicts
-//   2. Mark as P the number of propagations in step 1
+//   2. Mark as P the number of propagations spent in step 1
 //   3. Spend k_c * P propagations on cubifying enqueued clauses, if any
-//   4. Spend at most X conflicts on searching in the best-scored cubes
+//   4. Spend at most X conflicts on searching in the best-scored cube(s)
 //   5. Simplify
 // 
-// In step 4, any cube reaching SAT also gives SAT for the full problem. Any
-// cube reaching UNSAT gives some subclause of ~cube as an implicate clause
-// of the formula. If the subclause is empty, the full problem is UNSAT.
+// In step 4, a search within a cube C may terminate with a result. Then:
+//
+//   - if SAT with model S:
+//     - (S u C) is a model for the unconditioned problem
+//     - we can terminate with SAT
+//
+//   - if UNSAT with conflict clause ~D:
+//     - D is some subcube of C
+//     - if D is empty, the full problem is UNSAT
+//     - otherwise, we can replace the originating clause with ~D, and also
+//       enqueue ~D for cubification
 //
 // Configuration:
 //  - Step 4 can be delayed until the cubification queue is empty.
