@@ -3,4 +3,5 @@ build/
 *.swp
 *.swo
 *.swn
+*.pyc
 minisat_cubing

@@ -1,4 +1,5 @@
 import json
+import re
 
 from . import benchmark
 from . import cnf
@@ -42,7 +43,19 @@ def benchmarkify(j):
 
 
 def refine(ref_roots, mod_roots):
-    """Returns: ref_dicts, mod_dicts, benchmark_names"""
+    """Refines measurement results into a more useful form.
+
+    Arguments:
+    ref_roots -- dirname to results of reference solver, e.g.:
+                 ['runs/original_1', 'runs/original_2', ...]
+    mod_roots -- dirname to results of modified solver, e.g.:
+                 ['runs/modified_1', 'runs/modified_2', ...]
+
+    Returns:
+    refs -- array of dicts from benchmarkify(), reference solver
+    mods -- array of dicts from benchmarkify(), modified solver
+    names -- list of instance names
+    """
     ref_heads = [read_head(root) for root in ref_roots]
     mod_heads = [read_head(root) for root in mod_roots]
     refs = [benchmarkify(j) for j in ref_heads]
@@ -57,6 +70,45 @@ def refine(ref_roots, mod_roots):
             assert(names == names_here)
 
     return refs, mods, names
+
+
+def parse_modified_output(outfile):
+    """Parse solving statistics from the given file, which contains
+    the stdout from the solver run.
+    """
+    info = {}
+    with open(outfile) as f:
+        for line in f:
+            line = line.rstrip()
+            m = re.search(r'\| (\S+):\s+(\d+\.\d+|\d+)', line)
+            if m:
+                left = m.group(1)
+                right = m.group(2)
+                if left == 'Search':
+                    info['search_time'] = float(right)
+                elif left == 'Cubification':
+                    info['cubify_time'] = float(right)
+                elif left == 'Search(cube)':
+                    info['cube_search_time'] = float(right)
+                elif left == 'End simplify':
+                    info['simplify_time'] = float(right)
+                elif left == 'Exit':
+                    info['exit_point'] = int(right)
+            m = re.search(r'(.+\S)\s+:\s*(\d+.\d+|\d+)', line)
+            if m:
+                left = m.group(1)
+                right = m.group(2)
+                if left == 'cubifications':
+                    info['num_cubifications'] = int(right)
+                elif left == 'cube refutations':
+                    info['num_refutations'] = int(right)
+                elif left == 'final mean score':
+                    info['final_mean_score'] = float(right)
+                elif left == 'CPU time':
+                    info['cpu_time'] = float(right)
+            if line in ('SATISFIABLE', 'UNSATISFIABLE', 'INDETERMINATE'):
+                info['result'] = line
+    return info
 
 
 def check_model(instance_path, result_path):
