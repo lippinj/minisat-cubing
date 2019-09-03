@@ -63,11 +63,11 @@ void CubeQueue::addParentInd(const Cube& cube, int i)
 {
 	auto& v = implicants.at(cube).second;
 
-#ifndef NO_CS_ASSERTS
 	for (auto j : v) {
-		assert(j != i);
+		if (j == i) {
+			return;
+		}
 	}
-#endif
 
 	v.push_back(i);
 }
