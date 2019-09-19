@@ -289,7 +289,7 @@ def relative_comparison_plot_horizontal(A, ax, timeout=None, xname='Solver X', y
     ax.legend()
 
     ax.set_xlabel('{} time (s)'.format(xname))
-    ax.set_ylabel('{} time (relative)'.format(yname, xname))
+    ax.set_ylabel('{} time (relative)'.format(yname))
     # ax.yaxis.set_ticks((0.1, 0.5, 1.0, 2.0, 10.0), ('0.1x', '0.5x', '1x', '2x', '10x'))
 
     a = math.log(zlims[0], 10.0)

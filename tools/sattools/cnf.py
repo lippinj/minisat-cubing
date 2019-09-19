@@ -166,7 +166,7 @@ class Cnf:
         random.shuffle(variable_map)
 
         # Flip sign?
-        flip_sign = [random.uniform(0, 1) for i in range(self.max_variable())]
+        flip_sign = [random.randint(0, 1) == 1 for i in range(self.max_variable())]
 
         clauses = []
         for i in clause_order:
@@ -179,6 +179,8 @@ class Cnf:
                     K = -K
                 if flip_sign[abs(L) - 1]:
                     K = -K
+                assert(K != 0)
+                assert(abs(K) <= self.max_variable())
                 dst_clause.append(K)
             clauses.append(tuple(dst_clause))
 

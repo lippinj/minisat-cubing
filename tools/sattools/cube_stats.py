@@ -120,5 +120,5 @@ def plot_score_distribution(ax, S, N, C, name='no name given',
     
     if show_title:
         pct_c = 100.0 * float(C) / np.sum(N)
-        ax.set_title('{}\n$\mu$={:.2f}; c={:.2f}%'.format(name, mean, pct_c))
+        ax.set_title('{}\n$\\mu$={:.2f}; c={:.2f}%'.format(name, mean, pct_c))
 

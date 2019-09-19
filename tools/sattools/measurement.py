@@ -55,6 +55,7 @@ class Measurement:
         self.duration_solve_original = None
         self.duration_solve_modified = None
         self.duration_check = None
+        self.duration_verify = None
         self.tags = []
 
     def print_hello(self):
@@ -211,6 +212,8 @@ class Measurement:
         refs, mods, names = verify.refine(ref_roots, mod_roots)
         assert(set(names) == set(self.benchmark_filenames))
 
+        i = 0
+        name = ''
         for i, name in enumerate(names):
             if i % 20 == 0:
                 verify.print_verify_head(len(self.tags))

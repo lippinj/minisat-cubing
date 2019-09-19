@@ -194,7 +194,6 @@ class TimedRunBatch:
             
     def _on_start(self, run):
         """Called when a run is started."""
-        pass
             
     def _on_done(self, run, result):
         """Called when a run completes."""
