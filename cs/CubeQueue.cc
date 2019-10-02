@@ -7,18 +7,21 @@ CubeQueue::CubeQueue(size_t budget) : budget(budget)
 
 void CubeQueue::push(const Cube& cube, double score, int i)
 {
-	if (contains(cube)) return;
+    if (!contains(cube)) {
+        if ((implicants.size() + 1) >= budget) {
+            auto back = peekWorst();
+            pop(back);
+        }
 
-    if ((implicants.size() + 1) >= budget) {
-        auto back = peekWorst();
-        pop(back);
+        implicants[cube] = { score, { i } };
+        scorewise[score].push_back(cube);
+
+        sumScore += score;
+        numSeen += 1.0;
     }
-
-	implicants[cube] = { score, { i } };
-	scorewise[score].push_back(cube);
-
-	sumScore += score;
-	numSeen += 1.0;
+    else {
+        addParentInd(cube, i);
+    }
 }
 
 void CubeQueue::pop(const Cube& cube)

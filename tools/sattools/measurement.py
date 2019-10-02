@@ -110,7 +110,7 @@ class Measurement:
             # Otherwise, randomize
             else:
                 src_cnf = Cnf.from_file(src)
-                dst_cnf = src_cnf.shuffle(seed)
+                dst_cnf = src_cnf.shuffle(seed, False)
                 dst_cnf.to_file(dst)
 
         t1 = time.monotonic()

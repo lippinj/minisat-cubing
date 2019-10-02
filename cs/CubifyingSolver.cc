@@ -9,13 +9,13 @@ namespace Minisat
 static const char* _cat = "CS";
 
 static DoubleOption opt_k_t(_cat, "k_t",
-        "Density threshold", 10.0, DoubleRange(0, false, HUGE_VAL, false));
+        "Density threshold", 5.0, DoubleRange(0, false, HUGE_VAL, false));
 
 static IntOption  opt_max_cubify(_cat, "max-cubify",
         "Maximum cubifiable size", 6, IntRange(2, INT_MAX));
 
 static DoubleOption opt_k_c(_cat, "k_c",
-        "Cubification coefficient", 10.0, DoubleRange(0, false, HUGE_VAL, false));
+        "Cubification coefficient", 1.0, DoubleRange(0, false, HUGE_VAL, false));
 
 static BoolOption opt_always_search(_cat, "always-search",
         "Search inside a cube even before cubification is completed", false);
@@ -261,11 +261,13 @@ bool CubifyingSolver::makeCubifyPath(const std::vector<Lit>& C, std::vector<Lit>
 
 	// Each i corresponds to the subcube C \ C[i], which is of size N - 1.
 	//
-	// At each i, the following invariant holds:
-	//   cube = C[0, ..., i-2]
+	// At each i, cube is some prefix of C, with size of at most i, e.g.:
+    //   cube = []
+    //   cube = C[0]
+    //   ...
+    //   cube = C[0,...,i-1]
 	//
-	// Therefore we reach C \ C[i] by pushing:
-	//   C[i-1], C[i+1], C[i+2], ...
+	// We reach C \ C[i] by pushing the remaining literals, except for C[i].
 	//
 	// The path and its cancellation are pushed to the stack, except if we
 	// already know a score for C \ C[i], in which case that i is skipped.
@@ -280,10 +282,11 @@ bool CubifyingSolver::makeCubifyPath(const std::vector<Lit>& C, std::vector<Lit>
 
 		if (!cq.contains(terminal))
 		{
-			for (int j = i - 1; j < N; ++j)
+			for (int j = 0; j < N; ++j)
 			{
-				if (j < 0) continue;
 				if (j == i) continue;
+                if ((j < i) && (j < cube.size())) continue;
+                if ((j > i) && (j <= cube.size())) continue;
 
 				auto L = C[j];
 
@@ -368,7 +371,9 @@ Cube CubifyingSolver::cubifyInternal(const int i, const Cube& root)
 				double num = trail.size() - trail0;
 				double den = cube.size();
 				double score = num / den;
-				cq.push(cube, score, bi.bw(i));
+                if (score > 1.0) {
+                    cq.push(cube, score, bi.bw(i));
+                }
 			}
 		}
 	}

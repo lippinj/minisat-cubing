@@ -148,11 +148,11 @@ class Cnf:
             self._width_stats = dict(ws)
         return self._width_stats
 
-    def shuffle(self, seed):
+    def shuffle(self, seed, signs=True):
         """Returns another Cnf with the same structure but randomized:
           - order of clauses
           - variable names
-          - variable signs
+          - variable signs (optoinal)
         """
         import random
         random.seed(seed)
@@ -166,7 +166,10 @@ class Cnf:
         random.shuffle(variable_map)
 
         # Flip sign?
-        flip_sign = [random.randint(0, 1) == 1 for i in range(self.max_variable())]
+        if signs:
+            flip_sign = [random.randint(0, 1) == 1 for i in range(self.max_variable())]
+        else:
+            flip_sign = [False for i in range(self.max_variable())]
 
         clauses = []
         for i in clause_order:
