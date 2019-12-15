@@ -10,5 +10,9 @@ This work is the implementation part of an MSc thesis.
 
 ## changes
 
-The original Minisat code has been left unchanged as far as possible. A few
-small changes were necessary to make compilation work also in VS.
+The `Main.cc` file is a modification of `simp/Main.cc` of MiniSat.
+
+Additionally, the following files from MiniSat have been changed:
+`minisat/core/Solver.h`,
+`minisat/core/Solver.cc`, 
+`minisat/utils/System.cc`.
