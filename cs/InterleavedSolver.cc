@@ -1,4 +1,6 @@
 /***************************************************************************[InterleavedSolver.cc]
+Copyright (c) 2003-2006, Niklas Een, Niklas Sorensson
+Copyright (c) 2007-2010, Niklas Sorensson
 Copyright (c) 2019, Joonas Lipping
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
