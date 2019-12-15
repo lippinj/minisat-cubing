@@ -58,51 +58,51 @@ void postSolve(Solver*, FILE*);
 
 int main(int argc, char** argv)
 {
-	try {
+    try {
 #ifndef NO_CS_ASSERTS
-		printf("With CS assertions\n");
+        printf("With CS assertions\n");
 #endif
-		setUsageHelp("USAGE: %s [options] <input-file> <result-output-file>\n\n  where input may be either in plain or gzipped DIMACS.\n");
-		setX86FPUPrecision();
+        setUsageHelp("USAGE: %s [options] <input-file> <result-output-file>\n\n  where input may be either in plain or gzipped DIMACS.\n");
+        setX86FPUPrecision();
 
-		// Extra options:
-		//
-		IntOption    verb("MAIN", "verb", "Verbosity level (0=silent, 1=some, 2=more).", 1, IntRange(0, 2));
-		BoolOption   pre("MAIN", "pre", "Completely turn on/off any preprocessing.", true);
-		BoolOption   solve("MAIN", "solve", "Completely turn on/off solving after preprocessing.", true);
-		StringOption dimacs("MAIN", "dimacs", "If given, stop after preprocessing and write the result to this file.");
-		IntOption    cpu_lim("MAIN", "cpu-lim", "Limit on CPU time allowed in seconds.\n", 0, IntRange(0, INT32_MAX));
-		IntOption    mem_lim("MAIN", "mem-lim", "Limit on memory usage in megabytes.\n", 0, IntRange(0, INT32_MAX));
-		BoolOption   strictp("MAIN", "strict", "Validate DIMACS header during parsing.", false);
+        // Extra options:
+        //
+        IntOption    verb("MAIN", "verb", "Verbosity level (0=silent, 1=some, 2=more).", 1, IntRange(0, 2));
+        BoolOption   pre("MAIN", "pre", "Completely turn on/off any preprocessing.", true);
+        BoolOption   solve("MAIN", "solve", "Completely turn on/off solving after preprocessing.", true);
+        StringOption dimacs("MAIN", "dimacs", "If given, stop after preprocessing and write the result to this file.");
+        IntOption    cpu_lim("MAIN", "cpu-lim", "Limit on CPU time allowed in seconds.\n", 0, IntRange(0, INT32_MAX));
+        IntOption    mem_lim("MAIN", "mem-lim", "Limit on memory usage in megabytes.\n", 0, IntRange(0, INT32_MAX));
+        BoolOption   strictp("MAIN", "strict", "Validate DIMACS header during parsing.", false);
 
-		parseOptions(argc, argv, true);
+        parseOptions(argc, argv, true);
 
-		std::unique_ptr<SimpSolver> pS(makeSolver());
-		SimpSolver& S = *dynamic_cast<SimpSolver*>(pS.get());
+        std::unique_ptr<SimpSolver> pS(makeSolver());
+        SimpSolver& S = *dynamic_cast<SimpSolver*>(pS.get());
 
-		double initial_time = cpuTime();
+        double initial_time = cpuTime();
 
-		if (!pre) S.eliminate(true);
+        if (!pre) S.eliminate(true);
 
-		S.verbosity = verb;
+        S.verbosity = verb;
 
-		solver = &S;
-		// Use signal handlers that forcibly quit until the solver will be able to respond to
-		// interrupts:
-		sigTerm(SIGINT_exit);
+        solver = &S;
+        // Use signal handlers that forcibly quit until the solver will be able to respond to
+        // interrupts:
+        sigTerm(SIGINT_exit);
 
-		// Try to set resource limits:
-		if (cpu_lim != 0) limitTime(cpu_lim);
-		if (mem_lim != 0) limitMemory(mem_lim);
+        // Try to set resource limits:
+        if (cpu_lim != 0) limitTime(cpu_lim);
+        if (mem_lim != 0) limitMemory(mem_lim);
 
-		if (argc == 1)
-			printf("Reading from standard input... Use '--help' for help.\n");
+        if (argc == 1)
+            printf("Reading from standard input... Use '--help' for help.\n");
 
-		gzFile in = (argc == 1) ? gzdopen(0, "rb") : gzopen(argv[1], "rb");
-		if (in == NULL) {
-			printf("ERROR! Could not open file: %s\n", argc == 1 ? "<stdin>" : argv[1]);
-			exit(1);
-		}
+        gzFile in = (argc == 1) ? gzdopen(0, "rb") : gzopen(argv[1], "rb");
+        if (in == NULL) {
+            printf("ERROR! Could not open file: %s\n", argc == 1 ? "<stdin>" : argv[1]);
+            exit(1);
+        }
         
         if (S.verbosity > 0){
             printf("============================[ Problem Statistics ]=============================\n");
@@ -144,8 +144,8 @@ int main(int argc, char** argv)
         lbool ret = l_Undef;
 
         if (solve){
-			ret = payload(&S);
-			postSolve(&S, res);
+            ret = payload(&S);
+            postSolve(&S, res);
         }else if (S.verbosity > 0)
             printf("===============================================================================\n");
 
