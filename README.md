@@ -8,7 +8,7 @@ search in branches specified by "implicant cubes".
 
 This work is the implementation part of an MSc thesis.
 
-## notes on modifications
+## MiniSat source code
 
 This repository contains MiniSat code (in `Main.cc` and in the files
 under `minisat/`), with some modifications.
